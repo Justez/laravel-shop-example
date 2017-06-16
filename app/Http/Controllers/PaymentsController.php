@@ -59,7 +59,9 @@ class PaymentsController extends Controller
                 //{} else {Redirect::route('/')->with('error','Unknown error. Please try again a bit later.');}
                 //return view('cart/checkout',compact('cart_products','cart_total'));
             }
-        } else return Redirect::route('/login')->with('error','You must login to purchase');
+        } else {
+          return Redirect::route('/login')->with('error','You must login to purchase');
+        }
     }
 
     public function payPaypal()

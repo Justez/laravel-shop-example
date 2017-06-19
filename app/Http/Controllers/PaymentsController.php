@@ -12,13 +12,6 @@ use Illuminate\Support\Facades\Redirect;
 
 class PaymentsController extends Controller
 {
-    private $app_id = 0;
-    private $api_key = "";
-    private $api_secret = "";
-    private $callback_url = "";
-    private $cancel_url = "";
-    private $success_url = "";
-
     public function paymentVerify()
     {
         switch (Input::get('method')) {
@@ -37,16 +30,6 @@ class PaymentsController extends Controller
         }
     }
 
-    public function coingateSetter()
-    {
-        $this->setAppId(318);
-        $this->setApiKey("LihOJSxFN1fd9boWjcTtIa");
-        $this->setApiSecret("3Hmn0RPcjQOrhSg7KIsvDF8LMtpaqeyx");
-        $this->setCallbackUrl("http://justina.cgtest.eu/laravelshop/coinGateCallback.php");
-        $this->setCancelUrl("http://justina.cgtest.eu/laravelshop/checkout.php");
-        $this->setSuccessUrl("http://justina.cgtest.eu/laravelshop/order.php");
-    }
-
     public function createCoingateOrder()
     {
         if (!Auth::guest()) {
@@ -56,7 +39,6 @@ class PaymentsController extends Controller
                 return Redirect::route('/')->with('error','Your cart is empty');
             } else {
                 $cart_total=array_sum(array_column($cart_products,'total'));
-                $this->coingateSetter();
                 $createdOrderId = $this->saveOrder("BTC");
                 $currency = Order::where('id',$createdOrderId)->get()[0]['currency'];
                 $description = Order::where('id',$createdOrderId)->get()[0]['description'];
@@ -67,21 +49,26 @@ class PaymentsController extends Controller
                     'receive_currency'  => 'BTC',
                     'title'             => (string)$createdOrderId,
                     'description'       => substr($description,0,(strlen($description) > 500) ? 500 : strlen($description)),
-                    'callback_url'      => $this->callback_url,
-                    'cancel_url'        => $this->cancel_url,
-                    'success_url'       => $this->success_url
+                    'callback_url'      => "http://localhost:8001/cgcallback",
+                    'cancel_url'        => "http://localhost:8001/checkout",
+                    'success_url'       => "http://localhost:8001/order"
                 );
-
                 $response = $this->api_request('https://api-sandbox.coingate.com/v1/orders', 'POST', $post_params);
-                dd($response);
-                //check if the order is Valid
-                //{
-                //$this->saveOrder("BTC");
-
-                return view('orders/order',compact('order'));
-                //return view('orders/order',compact('order'));
-                //} else {Redirect::route('/')->with('error','Unknown error. Please try again a bit later.');}
-                //return view('cart/checkout',compact('cart_products','cart_total'));
+                if ($response['status_code']==200) {
+                    $redirect = substr($response['response_body'], strpos($response['response_body'], 'ent_url":"')+10,-2);
+                    header("Location: ".$redirect);
+                    exit();
+                } elseif ($response['status_code']==401) {
+                    Redirect::back()->with('error','Configuration error. Please contact to site administrator about this problem.');
+                } elseif ($response['status_code']==404) {
+                    Redirect::back()->with('error','Please try again.');
+                } elseif ($response['status_code']==500) {
+                    Redirect::rback()->with('error','Payment with bitcoins is temporary unavailable.');
+                } elseif ($response['status_code']==429) {
+                    Redirect::route('/')->with('error','Unknown error. Please try again a bit later or choose another payment type.');
+                } else {
+                    Redirect::route('/')->with('error','Unknown error. Please try again a bit later.');
+                }
             }
         } else {
           return Redirect::route('/login')->with('error','You must login to purchase');
@@ -118,6 +105,10 @@ class PaymentsController extends Controller
 
     private function api_request($url, $method = 'GET', $params = array())
     {
+        define('APP_ID', 318);
+        define('API_KEY', 'LihOJSxFN1fd9boWjcTtIa');
+        define('API_SECRET', '3Hmn0RPcjQOrhSg7KIsvDF8LMtpaqeyx');
+
         $nonce      = time();
         $message    = $nonce . APP_ID . API_KEY;
         $signature  = hash_hmac('sha256', $message, API_SECRET);
@@ -153,6 +144,11 @@ class PaymentsController extends Controller
         return array('status_code' => $http_status, 'response_body' => $response);
     }
 
+    public function callback()
+    {
+
+    }
+
     public function payPaypal()
     {
         $this->createCoingateOrder();
@@ -169,65 +165,5 @@ class PaymentsController extends Controller
     {
         $this->createCoingateOrder();
         return view('payments/payCard');
-    }
-
-    public function getAppId()
-    {
-        return $this->$app_id;
-    }
-
-    public function getApiKey()
-    {
-        return $this->$api_key;
-    }
-
-    public function getApiSecret()
-    {
-        return $this->$api_secret;
-    }
-
-    public function getCallbackUrl()
-    {
-        return $this->$callback_url;
-    }
-
-    public function getCancelUrl()
-    {
-        return $this->$cancel_url;
-    }
-
-    public function getSuccessUrl()
-    {
-        return $this->$success_url;
-    }
-
-    public function setAppId($i)
-    {
-        $this->app_id = $i;
-    }
-
-    public function setApiKey($i)
-    {
-        $this->api_key = $i;
-    }
-
-    public function setApiSecret($i)
-    {
-        $this->api_secret = $i;
-    }
-
-    public function setCallbackUrl($i)
-    {
-        $this->callback_url = $i;
-    }
-
-    public function setCancelUrl($i)
-    {
-        $this->cancel_url = $i;
-    }
-
-    public function setSuccessUrl($i)
-    {
-        $this->success_url = $i;
     }
 }

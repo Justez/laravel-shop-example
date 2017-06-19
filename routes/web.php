@@ -12,6 +12,7 @@ Route::post('/pay','PaymentsController@paymentVerify');
 Route::get ('/orders','OrdersController@getIndex');
 Route::any ('/order','OrdersController@show');
 Route::get ('/my_orders','OrdersController@all');
+Route::post('/cgcallback','PaymentsController@callback');
 Route::get ('/logout', ['uses' => 'Auth\LoginController@logout'])->name('logout');
 Route::get ('/home', 'HomeController@index')->name('home');
 Route::get ('/login', function()

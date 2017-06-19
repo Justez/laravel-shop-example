@@ -3,7 +3,7 @@
 namespace App\Http\Controllers;
 
 use Auth;
-use Session;
+
 use App\Order;
 use Coingate\Coingate;
 use Illuminate\Http\Request;
@@ -14,7 +14,8 @@ class OrdersController extends Controller
     public function show()
     {
       //coingate sends order details via post method
-      $order = Order::find($id);
+      dd($request->isMethod('post'));
+      $order = Order::find();
       Session::forget('cart');
       dd("show order");
     }

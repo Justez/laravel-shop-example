@@ -23,6 +23,7 @@ class CreateOrdersTable extends Migration
             $table->string('currency');
             $table->string('pay_type');
             $table->string('token');
+            $table->string('status')->default('pending');
             $table->timestamps();
             });
 

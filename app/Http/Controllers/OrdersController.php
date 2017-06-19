@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use Auth;
 use Session;
 use App\Order;
 use Coingate\Coingate;
@@ -20,7 +21,7 @@ class OrdersController extends Controller
     {
         $orders = Order::where('id','=',Auth::user()->id)->get();
         $amount = count($orders);
-        return view('products/products',compact('products','amount'));
+        return view('orders/my_orders',compact('orders','amount'));
     }
 
 

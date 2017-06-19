@@ -17,6 +17,7 @@ class CreateOrdersTable extends Migration
         {
             $table->increments('id');
             $table->integer('user_id');
+            $table->string('description');
             $table->integer('amount');
             $table->decimal('total', 10, 4);
             $table->string('currency');

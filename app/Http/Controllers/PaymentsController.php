@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Session;
 use App\Order;
+use App\Product;
 use App\OrderLine;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Input;
@@ -18,7 +19,7 @@ class PaymentsController extends Controller
     private $cancel_url = "";
     private $success_url = "";
 
-    public function paymentVefify()
+    public function paymentVerify()
     {
         switch (Input::get('method')) {
             case "BTC":
@@ -43,7 +44,7 @@ class PaymentsController extends Controller
         $this->setApiSecret("3Hmn0RPcjQOrhSg7KIsvDF8LMtpaqeyx");
         $this->setCallbackUrl("http://justina.cgtest.eu/laravelshop/coinGateCallback.php");
         $this->setCancelUrl("http://justina.cgtest.eu/laravelshop/checkout.php");
-        $this->setSuccessUrl("http://justina.cgtest.eu/laravelshop/success.php");
+        $this->setSuccessUrl("http://justina.cgtest.eu/laravelshop/order.php");
     }
 
     public function createCoingateOrder()
@@ -56,12 +57,29 @@ class PaymentsController extends Controller
             } else {
                 $cart_total=array_sum(array_column($cart_products,'total'));
                 $this->coingateSetter();
+                $createdOrderId = $this->saveOrder("BTC");
+                $currency = Order::where('id',$createdOrderId)->get()[0]['currency'];
+                $description = Order::where('id',$createdOrderId)->get()[0]['description'];
+                $post_params = array(
+                    'order_id'          => (string)$createdOrderId,
+                    'price'             => $cart_total,
+                    'currency'          => $currency,
+                    'receive_currency'  => 'BTC',
+                    'title'             => (string)$createdOrderId,
+                    'description'       => substr($description,0,(strlen($description) > 500) ? 500 : strlen($description)),
+                    'callback_url'      => $this->callback_url,
+                    'cancel_url'        => $this->cancel_url,
+                    'success_url'       => $this->success_url
+                );
 
-                //dd($user_id);
+                $response = api_request('https://api-sandbox.coingate.com/v1/orders', 'POST', $post_params);
+                dd($response);
                 //check if the order is Valid
                 //{
                 //$this->saveOrder("BTC");
-                return Redirect::route('/order/'.$this->saveOrder("BTC"));
+
+                return view('orders/order',compact('order'));
+                //return view('orders/order',compact('order'));
                 //} else {Redirect::route('/')->with('error','Unknown error. Please try again a bit later.');}
                 //return view('cart/checkout',compact('cart_products','cart_total'));
             }
@@ -75,11 +93,14 @@ class PaymentsController extends Controller
         $id = Order::insertGetId(
             array(
                 'user_id'=>Auth::user()->id,
+                'description'=>implode(array_column(Session::get('cart'),'title'),', '),
                 'amount'=>array_sum(array_column(Session::get('cart'),'amount')),
                 'total'=>array_sum(array_column(Session::get('cart'),'total')),
                 'currency'=>array_column(Session::get('cart'),'currency')[0],
                 'pay_type'=>$payType,
-                'token'=>Session::get('_token')
+                'token'=>Session::get('_token'),
+                'created_at'=>\Carbon\Carbon::now(),
+                'updated_at' => \Carbon\Carbon::now()
             ));
         foreach (Session::get('cart') as $item) {
             OrderLine::insert(
@@ -93,6 +114,43 @@ class PaymentsController extends Controller
                 ));
         }
         return $id;
+    }
+
+    private function api_request($url, $method = 'GET', $params = array())
+    {
+        $nonce      = time();
+        $message    = $nonce . APP_ID . API_KEY;
+        $signature  = hash_hmac('sha256', $message, API_SECRET);
+
+        $headers = array();
+        $headers[] = 'Access-Key: ' . API_KEY;
+        $headers[] = 'Access-Nonce: ' . $nonce;
+        $headers[] = 'Access-Signature: ' . $signature;
+
+        $curl = curl_init();
+
+        $curl_options = array(
+            CURLOPT_RETURNTRANSFER  => 1,
+            CURLOPT_URL             => $url
+        );
+
+        if ($method == 'POST') {
+            $headers[] = 'Content-Type: application/x-www-form-urlencoded';
+
+            array_merge($curl_options, array(CURLOPT_POST => 1));
+            curl_setopt($curl, CURLOPT_POSTFIELDS, http_build_query($params));
+        }
+
+        curl_setopt_array($curl, $curl_options);
+        curl_setopt($curl, CURLOPT_HTTPHEADER, $headers);
+        curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, FALSE);
+
+        $response       = curl_exec($curl);
+        $http_status    = curl_getinfo($curl, CURLINFO_HTTP_CODE);
+
+        curl_close($curl);
+
+        return array('status_code' => $http_status, 'response_body' => $response);
     }
 
     public function payPaypal()

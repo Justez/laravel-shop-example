@@ -72,7 +72,7 @@ class PaymentsController extends Controller
                     'success_url'       => $this->success_url
                 );
 
-                $response = api_request('https://api-sandbox.coingate.com/v1/orders', 'POST', $post_params);
+                $response = $this->api_request('https://api-sandbox.coingate.com/v1/orders', 'POST', $post_params);
                 dd($response);
                 //check if the order is Valid
                 //{

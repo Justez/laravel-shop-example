@@ -10,7 +10,7 @@ Route::post('/cart/remove','CartController@removeItem');
 Route::get ('/cart/delete','CartController@emptyCart');
 Route::post('/pay','PaymentsController@paymentVefify');
 Route::get ('/orders','OrdersController@getIndex');
-Route::get ('/order/{id}','OrdersController@show');
+Route::any ('/order/{id}','OrdersController@show');
 Route::get ('/my_orders','OrdersController@all');
 Route::get ('/logout', ['uses' => 'Auth\LoginController@logout'])->name('logout');
 Route::get ('/home', 'HomeController@index')->name('home');

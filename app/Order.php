@@ -7,8 +7,9 @@ use Illuminate\Database\Eloquent\Model;
 class Order extends Model
 {
     protected $table = 'orders';
-    //protected $fillable = array('user_id','user_name','address','total','currency');
-    protected $fillable = array('address','total','currency');
+    
+    protected $fillable = array('user_id','amount','total','currency','pay_type','token');
+
     public function orderItems()
     {
         return $this->belongsToMany('Product') ->withPivot('amount','total');

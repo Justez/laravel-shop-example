@@ -12,11 +12,19 @@ class UsersTableSeeder extends Seeder
      */
     public function run()
     {
+
       User::updateOrCreate(array(
         'name'=>'justina',
         'email'=>'justina@coingate.com',
-        'password'=>'admin',
+        'password'=>bcrypt('admin'),
         'admin'=>1
        ));
+
+       User::updateOrCreate(array(
+         'name'=>'justina',
+         'email'=>'1justina@coingate.com',
+         'password'=>bcrypt('jzlabyte'),
+         'admin'=>0
+        ));
     }
 }

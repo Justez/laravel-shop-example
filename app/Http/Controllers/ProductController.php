@@ -27,12 +27,4 @@ class ProductController extends Controller
             ->where('id', $id)
             ->update(['deleted' => 1]);
     }
-
-    public function renew($id)
-    {
-      DB::table('products')
-            ->where('id', $id)
-            ->update(['deleted' => 0]);
-    }
-
 }

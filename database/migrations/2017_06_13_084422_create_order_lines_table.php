@@ -21,6 +21,7 @@ class CreateOrderLinesTable extends Migration
           $table->decimal('price', 10, 4);
           $table->decimal('total', 10, 4);
           $table->text('currency');
+          $table->timestamps();
       });
     }
 

@@ -14,15 +14,15 @@ class OrdersController extends Controller
     public function show($id)
     {
       $order = Order::find($id);
-      dd($order);
+      dd("");
     }
 
     public function getIndex()
     {
         $orders = Order::where('id','=',Auth::user()->id)->get();
+        dd($orders);
         $amount = count($orders);
+        dd($orders);
         return view('orders/my_orders',compact('orders','amount'));
     }
-
-
 }

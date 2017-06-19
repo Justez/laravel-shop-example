@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 
 use Session;
+use App\Order;
+use App\OrderLine;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Input;
 use Illuminate\Support\Facades\Redirect;
@@ -54,9 +56,13 @@ class PaymentsController extends Controller
             } else {
                 $cart_total=array_sum(array_column($cart_products,'total'));
                 $this->coingateSetter();
+
                 //dd($user_id);
                 //check if the order is Valid
-                //{} else {Redirect::route('/')->with('error','Unknown error. Please try again a bit later.');}
+                //{
+                //$this->saveOrder("BTC");
+                return Redirect::route('/order/'.$this->saveOrder("BTC"));
+                //} else {Redirect::route('/')->with('error','Unknown error. Please try again a bit later.');}
                 //return view('cart/checkout',compact('cart_products','cart_total'));
             }
         } else {
@@ -64,18 +70,46 @@ class PaymentsController extends Controller
         }
     }
 
+    public function saveOrder($payType)
+    {
+        $id = Order::insertGetId(
+            array(
+                'user_id'=>Auth::user()->id,
+                'amount'=>array_sum(array_column(Session::get('cart'),'amount')),
+                'total'=>array_sum(array_column(Session::get('cart'),'total')),
+                'currency'=>array_column(Session::get('cart'),'currency')[0],
+                'pay_type'=>$payType,
+                'token'=>Session::get('_token')
+            ));
+        foreach (Session::get('cart') as $item) {
+            OrderLine::insert(
+                array(
+                    'order_id'=>$id,
+                    'product_id'=>$item['product_id'],
+                    'amount'=>$item['amount'],
+                    'price'=>$item['price'],
+                    'total'=>$item['total'],
+                    'currency'=>$item['currency']
+                ));
+        }
+        return $id;
+    }
+
     public function payPaypal()
     {
+        $this->createCoingateOrder();
         return view('payments/payPaypal');
     }
 
     public function payCash()
     {
+        $this->createCoingateOrder();
         return view('payments/payCash');
     }
 
     public function payCard()
     {
+        $this->createCoingateOrder();
         return view('payments/payCard');
     }
 

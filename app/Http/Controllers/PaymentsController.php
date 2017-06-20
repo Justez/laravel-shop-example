@@ -52,7 +52,7 @@ class PaymentsController extends Controller
                     'title'             => (string)$createdOrderId,
                     'description'       => substr($description,0,(strlen($description) > 500) ? 500 : strlen($description)),
                     'callback_url'      => "http://demo2.coingate.com/cgcallback?token=".Session::get('_token'),
-                    'cancel_url'        => "http://demo2.coingate.com/checkout",
+                    'cancel_url'        => "http://demo2.coingate.com/checkout?cancelOrder=true&order=".$createdOrderId,
                     'success_url'       => "http://demo2.coingate.com/BTCorders?emptyCart=true"
                 );
                 $response = \CoinGate\Merchant\Order::create($post_params, array(),array(

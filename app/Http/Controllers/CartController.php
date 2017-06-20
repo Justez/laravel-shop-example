@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use DB;
 use Auth;
 use Session;
 use App\Product;
@@ -43,6 +44,10 @@ class CartController extends Controller
     public function checkout()
     {
         if (!Auth::guest()) {
+            if (Input::get('cancelOrder')!==null&&Input::get('cancelOrder')==true&&
+                Input::get('order')!==null&&Input::get('order')>-1) {
+                DB::table('orders')->where('id', Input::get('order'))->update(['status' => 'cancelled']);
+            }
             $user_id = Auth::user()->id;
             $cart_products=Session::get('cart');
             $cart_total=array_sum(array_column($cart_products,'total'));

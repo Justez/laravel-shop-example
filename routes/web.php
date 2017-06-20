@@ -13,8 +13,7 @@ Route::get ('/orders','OrdersController@getIndex');
 Route::any ('/order/{id}','OrdersController@show');
 Route::any ('/order','OrdersController@showBTC');
 Route::any ('/BTCorders','OrdersController@getBTCOrders');
-Route::any ('/BTCorders/{id}','OrdersController@showBTC');
-Route::post('/cgcallback','PaymentsController@callback');
+Route::any ('/cgcallback','PaymentsController@callback');
 Route::get ('/logout', ['uses' => 'Auth\LoginController@logout'])->name('logout');
 Route::get ('/home', 'HomeController@index')->name('home');
 Route::get ('/login', function()

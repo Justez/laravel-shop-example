@@ -6,6 +6,7 @@ use Session;
 use App\Order;
 use App\Product;
 use App\OrderLine;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Input;
 use Illuminate\Support\Facades\Redirect;
@@ -49,9 +50,9 @@ class PaymentsController extends Controller
                     'receive_currency'  => 'BTC',
                     'title'             => (string)$createdOrderId,
                     'description'       => substr($description,0,(strlen($description) > 500) ? 500 : strlen($description)),
-                    'callback_url'      => "http://localhost:8001/cgcallback",
-                    'cancel_url'        => "http://localhost:8001/checkout",
-                    'success_url'       => "http://localhost:8001/order"
+                    'callback_url'      => "http://demo2.coingate.com/cgcallback",
+                    'cancel_url'        => "http://demo2.coingate.com/checkout",
+                    'success_url'       => "http://demo2.coingate.com/orders?emptyCart=true"
                 );
                 $response = \CoinGate\Merchant\Order::create($post_params, array(),array(
                     'environment' => 'sandbox',
@@ -60,6 +61,7 @@ class PaymentsController extends Controller
                     'api_secret' => '3Hmn0RPcjQOrhSg7KIsvDF8LMtpaqeyx'));
                 if ($response->status=="pending") {
                     Order::where('id',$createdOrderId)->update(['other' => $response->id]);
+                    Session::forget('cart');
                     header("Location: ".$response->payment_url);
                     exit();
                 } else {
@@ -99,22 +101,28 @@ class PaymentsController extends Controller
         return $id;
     }
 
-    public function callback()
+    public function callback(Request $request)
     {
-        $order = Order::find($request->input('order_id'));
-        if ($request->input('token') == $order->token) {
-            $status = NULL;
-            if ($request->input('status') == 'paid') {
-                if ($request->input('price') >= $order->total_price) {
+        if( $request->isMethod('post') ) {
+            $data = $request->all();
+            $order = Order::find($request->input('order_id'));
+            if ($request->input('token') == $order->token) {
+                $status = NULL;
+                if ($request->input('status') == 'paid' &&
+                    $request->input('price') >= $order->total) {
                     $status = 'paid';
                 }
+                else {
+                    $status = $request->input('status');
+                }
+                if (!is_null($status)) {
+                    $order->status = $status;
+                    $order->save();
+                    $order->update(['status' => $status]);
+                }
             }
-            else {
-                $status = $request->input('status');
-            }
-            if (!is_null($status)) {
-                $order->update(['status' => $status]);
-            }
+        } else {
+            abort(403, 'You cannot access this page directly.');
         }
     }
 

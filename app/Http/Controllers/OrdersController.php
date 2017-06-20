@@ -3,15 +3,17 @@
 namespace App\Http\Controllers;
 
 use Auth;
+use Session;
 use App\Order;
 use App\OrderLine;
 use Coingate\Coingate;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Input;
 
 class OrdersController extends Controller
 {
 
-    public function getBTCOrders(Request $request)
+    public function getBTCOrders()
     {
         $orders = Order::where('user_id','=',Auth::user()->id)->where('pay_type','=','BTC')->orderBy('id', 'DESC')->get();
         $amount = count($orders);
@@ -24,16 +26,9 @@ class OrdersController extends Controller
                 $btcOrders[$order->id]=substr($response['response_body'],$from,$to-$from);
             }
         }
-        return view('orders/ordersBTC',compact('orders','amount','$btcOrders'));
+        return view('orders/ordersBTC',compact('orders','amount','btcOrders'));
     }
 
-    public function showBTC($id)
-    {
-      $order = Order::find($id);
-      $productNames = explode(', ',$order->description);
-      $orderLines = OrderLine::where('order_id',$order->id)->get();
-      return view('orders/orderBTC',compact('order','orderLines','productNames'));
-    }
     public function show($id)
     {
       $int = -1;
@@ -45,6 +40,10 @@ class OrdersController extends Controller
 
     public function getIndex()
     {
+        $input = Input::all();
+        if (isset($input['emptyCart']) && $input['emptyCart']) {
+            Session::forget('cart');
+        }
         $orders = Order::where('user_id','=',Auth::user()->id)->orderBy('id', 'DESC')->get();
         $amount = count($orders);
         return view('orders/orders',compact('orders','amount'));

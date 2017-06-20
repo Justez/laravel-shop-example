@@ -9,7 +9,7 @@
             <tr>
                 <td><b>Description</b></td>
                 <td><b>Date</b></td>
-                <td><b>Amount</b></td>
+                <td><b>Items</b></td>
                 <td><b>Total</b></td>
                 <td><b>BTC</b></td>
                 <td><b>Status</b></td>
@@ -20,7 +20,7 @@
                 <td>{{$order_item['created_at']}}</td>
                 <td>{{$order_item['amount']}}</td>
                 <td>{{$order_item['total']}} {{$order_item['currency']}}</td>
-                <td>amount in btc</td>
+                <td>{{$btcOrders[$order_item['id']]}}</td>
                 <td>{{$order_item['status']}}</td>
             </tr>
             @endforeach

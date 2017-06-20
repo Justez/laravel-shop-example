@@ -1,4 +1,4 @@
-@extends('layouts.header')
+@extends('layouts.master')
 @section('title', 'Products')
 
 @section('content')
@@ -37,7 +37,7 @@
     </div>
     </div>
     @if(count(Session::get('cart'),1)!==0)
-        <div class="sidebar pull-right thumbnail ">
+        <span class="sidebar pull-right thumbnail ">
             <p>Cart: {{@count(Session::get('cart'))}} products </p>
             <div class="cart-sidebar caption thumbnail">
                 <ul>

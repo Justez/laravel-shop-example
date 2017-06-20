@@ -1,4 +1,4 @@
-@extends('layouts.header')
+@extends('layouts.master')
 
 @section('title', 'PayBTC')
 @section('content')

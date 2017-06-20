@@ -1,5 +1,5 @@
 @extends('layouts.master')
-@section('title', 'Order')
+@section('title', 'OrderBTC')
 
 @section('content')
 <div class="container" style="width:60%">

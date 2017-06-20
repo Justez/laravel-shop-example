@@ -1,9 +1,6 @@
-@extends('layouts.header')
+@extends('layouts.master')
 @section('title', 'Cart')
-@section('sidebar')
-    @parent
-    <!--show cart components-->
-@endsection
+
 @section('content')
 <div class="container" style="width:60%">
         <h1>Cart</h1>

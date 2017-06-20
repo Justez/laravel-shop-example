@@ -1,4 +1,4 @@
-@extends('layouts.header')
+@extends('layouts.master')
 
 @section('title', 'Checkout')
 @section('content')

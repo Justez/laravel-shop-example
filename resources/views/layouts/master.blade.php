@@ -37,9 +37,8 @@
         .sidebar {
           border-color: lightgrey ;
           border-width: thin;
-          margin-right: 10%;
+          margin-right: 20%;
           height: auto;
-          margin-top: 3%;
         }
     </style>
 </head>
@@ -80,7 +79,9 @@
                                 <li><a href="/checkout"><i class="icon-shopping-cart icon-white"></i> Items in cart: {{count(Session::get('cart'))}}</a></li>
                                 <li class="dropdown"><a href="#" class="dropdown-toggle" data-toggle="dropdown">{{Auth::user()->name}} <b class="caret"></b></a>
                                     <ul class="dropdown-menu">
-                                        <li><a href="/orders"><i class="icon-envelope"></i> My Orders</a></li>
+                                        <li><a href="/orders"><i class="icon-list"></i> My Orders</a></li>
+                                        <li class="divider"></li>
+                                        <li><a href="/BTCorders"><i class="icon-qrcode"></i> My BitCoin Orders</a></li>
                                         <li class="divider"></li>
                                         <li><a href="/logout"><i class="icon-off"></i> Logout</a></li>
                                     </ul>
@@ -94,7 +95,7 @@
 
 
 
-    
+
 
     @yield('content')
 

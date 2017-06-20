@@ -53,19 +53,15 @@ class PaymentsController extends Controller
                     'cancel_url'        => "http://localhost:8001/checkout",
                     'success_url'       => "http://localhost:8001/order"
                 );
-                $response = $this->api_request('https://api-sandbox.coingate.com/v1/orders', 'POST', $post_params);
-                if ($response['status_code']==200) {
-                    $redirect = substr($response['response_body'], strpos($response['response_body'], 'ent_url":"')+10,-2);
-                    header("Location: ".$redirect);
+                $response = \CoinGate\Merchant\Order::create($post_params, array(),array(
+                    'environment' => 'sandbox',
+                    'app_id' => 318,
+                    'api_key' => 'LihOJSxFN1fd9boWjcTtIa',
+                    'api_secret' => '3Hmn0RPcjQOrhSg7KIsvDF8LMtpaqeyx'));
+                if ($response->status=="pending") {
+                    Order::where('id',$createdOrderId)->update(['other' => $response->id]);
+                    header("Location: ".$response->payment_url);
                     exit();
-                } elseif ($response['status_code']==401) {
-                    Redirect::back()->with('error','Configuration error. Please contact to site administrator about this problem.');
-                } elseif ($response['status_code']==404) {
-                    Redirect::back()->with('error','Please try again.');
-                } elseif ($response['status_code']==500) {
-                    Redirect::rback()->with('error','Payment with bitcoins is temporary unavailable.');
-                } elseif ($response['status_code']==429) {
-                    Redirect::route('/')->with('error','Unknown error. Please try again a bit later or choose another payment type.');
                 } else {
                     Redirect::route('/')->with('error','Unknown error. Please try again a bit later.');
                 }
@@ -103,50 +99,23 @@ class PaymentsController extends Controller
         return $id;
     }
 
-    private function api_request($url, $method = 'GET', $params = array())
-    {
-        define('APP_ID', 318);
-        define('API_KEY', 'LihOJSxFN1fd9boWjcTtIa');
-        define('API_SECRET', '3Hmn0RPcjQOrhSg7KIsvDF8LMtpaqeyx');
-
-        $nonce      = time();
-        $message    = $nonce . APP_ID . API_KEY;
-        $signature  = hash_hmac('sha256', $message, API_SECRET);
-
-        $headers = array();
-        $headers[] = 'Access-Key: ' . API_KEY;
-        $headers[] = 'Access-Nonce: ' . $nonce;
-        $headers[] = 'Access-Signature: ' . $signature;
-
-        $curl = curl_init();
-
-        $curl_options = array(
-            CURLOPT_RETURNTRANSFER  => 1,
-            CURLOPT_URL             => $url
-        );
-
-        if ($method == 'POST') {
-            $headers[] = 'Content-Type: application/x-www-form-urlencoded';
-
-            array_merge($curl_options, array(CURLOPT_POST => 1));
-            curl_setopt($curl, CURLOPT_POSTFIELDS, http_build_query($params));
-        }
-
-        curl_setopt_array($curl, $curl_options);
-        curl_setopt($curl, CURLOPT_HTTPHEADER, $headers);
-        curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, FALSE);
-
-        $response       = curl_exec($curl);
-        $http_status    = curl_getinfo($curl, CURLINFO_HTTP_CODE);
-
-        curl_close($curl);
-
-        return array('status_code' => $http_status, 'response_body' => $response);
-    }
-
     public function callback()
     {
-
+        $order = Order::find($request->input('order_id'));
+        if ($request->input('token') == $order->token) {
+            $status = NULL;
+            if ($request->input('status') == 'paid') {
+                if ($request->input('price') >= $order->total_price) {
+                    $status = 'paid';
+                }
+            }
+            else {
+                $status = $request->input('status');
+            }
+            if (!is_null($status)) {
+                $order->update(['status' => $status]);
+            }
+        }
     }
 
     public function payPaypal()

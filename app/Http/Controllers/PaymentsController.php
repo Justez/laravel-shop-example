@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use DB;
 use Session;
 use App\Order;
 use App\Product;
@@ -52,7 +53,7 @@ class PaymentsController extends Controller
                     'description'       => substr($description,0,(strlen($description) > 500) ? 500 : strlen($description)),
                     'callback_url'      => "http://demo2.coingate.com/cgcallback",
                     'cancel_url'        => "http://demo2.coingate.com/checkout",
-                    'success_url'       => "http://demo2.coingate.com/orders?emptyCart=true"
+                    'success_url'       => "http://demo2.coingate.com/BTCorders?emptyCart=true"
                 );
                 $response = \CoinGate\Merchant\Order::create($post_params, array(),array(
                     'environment' => 'sandbox',
@@ -116,9 +117,7 @@ class PaymentsController extends Controller
                     $status = $request->input('status');
                 }
                 if (!is_null($status)) {
-                    $order->status = $status;
-                    $order->save();
-                    $order->update(['status' => $status]);
+                    DB::table('orders')->where('id', $order->id)->update(['status' => $status]);
                 }
             }
         } else {

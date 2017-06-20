@@ -15,6 +15,10 @@ class OrdersController extends Controller
 
     public function getBTCOrders()
     {
+        $input = Input::all();
+        if (isset($input['emptyCart']) && $input['emptyCart']) {
+            Session::forget('cart');
+        }
         $orders = Order::where('user_id','=',Auth::user()->id)->where('pay_type','=','BTC')->orderBy('id', 'DESC')->get();
         $amount = count($orders);
         $btcOrders = array();
@@ -40,10 +44,6 @@ class OrdersController extends Controller
 
     public function getIndex()
     {
-        $input = Input::all();
-        if (isset($input['emptyCart']) && $input['emptyCart']) {
-            Session::forget('cart');
-        }
         $orders = Order::where('user_id','=',Auth::user()->id)->orderBy('id', 'DESC')->get();
         $amount = count($orders);
         return view('orders/orders',compact('orders','amount'));

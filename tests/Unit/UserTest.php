@@ -13,8 +13,9 @@ class UserTest extends TestCase
      *
      * @return void
      */
-    public function testExample()
+    public function testDatabase()
     {
-        $this->assertTrue(true);
+        $this->assertDatabaseMissing('users', ['email' => 'sally@example.com'
+    ]);
     }
 }

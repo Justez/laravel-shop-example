@@ -12,7 +12,7 @@ class ProductController extends Controller
     public function getIndex()
     {
       $products = Product::where('deleted','=','0')->get();
-      $amount = 0;
+      $amount   = 0;
       return view('products/products',compact('products','amount'));
     }
 
@@ -24,7 +24,7 @@ class ProductController extends Controller
     public function delete($id)
     {
       DB::table('products')
-            ->where('id', $id)
-            ->update(['deleted' => 1]);
+          ->where('id', $id)
+          ->update(['deleted' => 1]);
     }
 }

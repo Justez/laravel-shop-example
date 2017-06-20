@@ -19,15 +19,18 @@ class OrdersController extends Controller
         if (isset($input['emptyCart']) && $input['emptyCart']) {
             Session::forget('cart');
         }
-        $orders = Order::where('user_id','=',Auth::user()->id)->where('pay_type','=','BTC')->orderBy('id', 'DESC')->get();
-        $amount = count($orders);
+        $orders    = Order::where('user_id','=',Auth::user()->id)
+            ->where('pay_type','=','BTC')
+            ->orderBy('id', 'DESC')
+            ->get();
+        $amount    = count($orders);
         $btcOrders = array();
         foreach ($orders as $order) {
             $response = $this->api_request('https://api-sandbox.coingate.com/v1/orders/'.$order->other);
             if ($response['status_code']==200) {
-                $from = strpos($response['response_body'],'nt":"')+5;
-                $to = strpos($response['response_body'],'","creat');
-                $btcOrders[$order->id]=substr($response['response_body'],$from,$to-$from);
+                $from                  = strpos($response['response_body'],'nt":"')+5;
+                $to                    = strpos($response['response_body'],'","creat');
+                $btcOrders[$order->id] = substr($response['response_body'],$from,$to-$from);
             }
         }
         return view('orders/ordersBTC',compact('orders','amount','btcOrders'));
@@ -35,10 +38,10 @@ class OrdersController extends Controller
 
     public function show($id)
     {
-      $int = -1;
-      $order = Order::find($id);
+      $int          = -1;
+      $order        = Order::find($id);
       $productNames = explode(', ',$order->description);
-      $orderLines = OrderLine::where('order_id',$order->id)->get();
+      $orderLines   = OrderLine::where('order_id',$order->id)->get();
       return view('orders/order',compact('order','orderLines','productNames','int'));
     }
 

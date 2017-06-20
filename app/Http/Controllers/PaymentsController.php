@@ -51,7 +51,7 @@ class PaymentsController extends Controller
                     'receive_currency'  => 'BTC',
                     'title'             => (string)$createdOrderId,
                     'description'       => substr($description,0,(strlen($description) > 500) ? 500 : strlen($description)),
-                    'callback_url'      => "http://demo2.coingate.com/cgcallback",
+                    'callback_url'      => "http://demo2.coingate.com/cgcallback?token=".Session::get('_token'),
                     'cancel_url'        => "http://demo2.coingate.com/checkout",
                     'success_url'       => "http://demo2.coingate.com/BTCorders?emptyCart=true"
                 );

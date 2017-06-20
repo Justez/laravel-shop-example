@@ -104,21 +104,18 @@ class PaymentsController extends Controller
 
     public function callback(Request $request)
     {
-        if( $request->isMethod('post') ) {
-            $data = $request->all();
-            $order = Order::find($request->input('order_id'));
-            if ($request->input('token') == $order->token) {
-                $status = NULL;
-                if ($request->input('status') == 'paid' &&
-                    $request->input('price') >= $order->total) {
-                    $status = 'paid';
-                }
-                else {
-                    $status = $request->input('status');
-                }
-                if (!is_null($status)) {
-                    DB::table('orders')->where('id', $order->id)->update(['status' => $status]);
-                }
+        $order = Order::find($request->input('order_id'));
+        if ($request->input('token') == $order->token) {
+            $status = null;
+            if ($request->input('status') == 'paid' &&
+                $request->input('price') >= $order->total) {
+                $status = 'paid';
+            }
+            else {
+                $status = $request->input('status');
+            }
+            if (!is_null($status)) {
+                DB::table('orders')->where('id', $order->id)->update(['status' => $status]);
             }
         } else {
             abort(403, 'You cannot access this page directly.');

@@ -26,7 +26,11 @@ task('upload:env', function () {
     upload('.env.production', '{{deploy_path}}/shared/.env');
 })->desc('Environment setup');
 
-task('products:seed', function () {
+task('migrate:refresh', function () {
+run('cd {{deploy_path}}/current && composer dump && php artisan migrate:refresh');
+});
+
+task('db:seed', function () {
 run('cd {{deploy_path}}/current && composer dump && php artisan db:seed');
 });
 

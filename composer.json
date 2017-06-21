@@ -9,6 +9,7 @@
         "coingate/coingate-php": "^2.0",
         "curl/curl": "^1.6",
         "deployer/deployer": "^5.0",
+        "laravel/browser-kit-testing": "^2.0",
         "laravel/framework": "5.4.*",
         "laravel/tinker": "~1.0"
     },

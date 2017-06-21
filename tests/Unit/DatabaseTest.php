@@ -15,7 +15,9 @@ class UserTest extends TestCase
      */
     public function testDatabase()
     {
-        $this->assertDatabaseMissing('users', ['email' => 'sally@example.com'
-    ]);
+        /*$this->getConnection();
+        $this->assertDatabaseMissing('users', ['email' => 'sally@example.com']);
+        $this->assertDatabaseHas('products', ['id' => '1']);
+        $this->seed();*/
     }
 }

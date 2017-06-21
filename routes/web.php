@@ -2,12 +2,12 @@
 
 use App\Product;
 
-Route::get ('/','ProductController@getIndex');
-Route::get ('/product/{id}','ProductController@show');
-Route::get ('/checkout','CartController@checkout');
-Route::post('/cart/add','CartController@postAddToCart');
-Route::post('/cart/remove','CartController@removeItem');
-Route::get ('/cart/delete','CartController@emptyCart');
+Route::get ('/','ProductsController@getIndex');
+Route::get ('/product/{id}','ProductsController@show');
+Route::get ('/checkout','CartsController@checkout');
+Route::post('/cart/add','CartsController@postAddToCart');
+Route::post('/cart/remove','CartsController@removeItem');
+Route::get ('/cart/delete','CartsController@emptyCart');
 Route::post('/pay','PaymentsController@paymentVerify');
 Route::get ('/orders','OrdersController@getIndex');
 Route::any ('/order/{id}','OrdersController@show');

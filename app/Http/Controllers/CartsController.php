@@ -14,7 +14,7 @@ use Illuminate\Support\Facades\Redirect;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Foundation\Http\FormRequest;
 
-class CartController extends Controller
+class CartsController extends Controller
 {
     public function postAddToCart()
     {
@@ -44,12 +44,12 @@ class CartController extends Controller
     public function checkout()
     {
         if (!Auth::guest()) {
-            $user_id       = Auth::user()->id;
             $cart_products = Session::get('cart');
-            $cart_total    = array_sum(array_column($cart_products,'total'));
-            if (!$cart_products) {
-                return Redirect::route('/')->with('error','Your cart is empty');
+            if (null==$cart_products) {
+                return redirect('/')->with('error','Your cart is empty');
             }
+            $user_id       = Auth::user()->id;
+            $cart_total    = array_sum(array_column($cart_products,'total'));
             return view('cart/checkout',compact('cart_products','cart_total'));
         } else return redirect('/login');
     }
